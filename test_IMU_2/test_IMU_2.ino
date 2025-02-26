@@ -37,8 +37,8 @@ void loop() {
   tf = (t * 9 / 5) + 32;
   getAngle(AcX, AcY, AcZ);
   Serial.print("Angle: ");
-  Serial.print("Pitch = ");
-  Serial.print(pitch);
+//  Serial.print("Pitch = ");
+//  Serial.print(pitch);
 //  Serial.print(" Roll = ");
 //  Serial.println(roll);
 //  Serial.print("Accelerometer: ");
