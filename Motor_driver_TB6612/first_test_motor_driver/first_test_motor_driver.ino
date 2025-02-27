@@ -11,8 +11,9 @@
 // Motor A
 
 int pwmA = 5;
-int in1A = 3;
+int in1A = 2; //used to be 3 but changed to save pwm output
 int in2A = 4;
+
 
 // Motor B
 
