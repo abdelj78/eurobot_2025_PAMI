@@ -10,16 +10,16 @@
 
 // Motor A
 
-int pwmA = 5;
-int in1A = 2; //used to be 3 but changed to save pwm output
-int in2A = 4;
+int pwmA = 9;//5;
+int in1A = 7;//2; //used to be 3 but changed to save pwm output
+int in2A = 4;//4;
 
 
 // Motor B
 
-int pwmB = 6;
-int in1B = 7;
-int in2B = 8;
+int pwmB = 10;//6;
+int in1B = 8;//7;
+int in2B = 12;//8;
 
 // Speed control potentiometers
 

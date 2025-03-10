@@ -119,9 +119,6 @@ void setup() {
     // 2 = DMP configuration updates failed
   }
 
-  //read just once for first time
-  if (!DMPReady) return; // Stop the program if DMP programming fails.
-  discardInitialReadings(1000);  // Discard the first 10 readings
   
   // Set start pin and wait until pressed
   pinMode(startPin, INPUT_PULLUP);  // Set the pin as an input
@@ -141,6 +138,12 @@ void setup() {
   Serial.println("Start signal received! end of setup");
   //float targetYaw = normalizeAngle(angleDes);
 
+  delay(2000);
+
+
+  //read just once for first time
+  if (!DMPReady) return; // Stop the program if DMP programming fails.
+  discardInitialReadings(1000);  // Discard the first 10 readings
 
   /* Read a packet from FIFO */
   while(!mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) { // Get the Latest packet 
@@ -165,7 +168,31 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
+  readIMU();
 
+  if (abs(normalizeAngle(angleDes-currentYaw)) > 2) {
+    rotateClockwise();
+  } else {
+    Serial.print("REACHED TARGET: ");
+    Serial.print("currentYaw: ");
+    Serial.print(currentYaw);
+    Serial.print("   angleDes: ");
+    Serial.println(angleDes);
+    stopMotors();
+    delay(5000); // Wait for 5 seconds //better to use millis() to keep looking at rotation changes
+    // Set new target yaw for the next 90° turn
+    readIMU();
+    angleDes = normalizeAngle(currentYaw + 90);
+    Serial.print("NEW TARGET: ");
+    Serial.print("currentYaw: "); 
+    Serial.print(currentYaw);
+    Serial.print("   angleDes: ");  
+    Serial.println(angleDes);
+  }
+
+}
+
+void readIMU() {
   if (!DMPReady) return; // Stop the program if DMP programming fails.
     
   /* Read a packet from FIFO */
@@ -174,30 +201,18 @@ void loop() {
     mpu.dmpGetQuaternion(&q, FIFOBuffer);
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    Serial.print("ypr\t");
-    Serial.print(ypr[0] * 180/M_PI);
-    Serial.print("\t");
-    Serial.print(ypr[1] * 180/M_PI);
-    Serial.print("\t");
-    Serial.println(ypr[2] * 180/M_PI);
+    // Serial.print("ypr\t");
+    // Serial.print(ypr[0] * 180/M_PI);
+    // Serial.print("\t");
+    // Serial.print(ypr[1] * 180/M_PI);
+    // Serial.print("\t");
+    // Serial.println(ypr[2] * 180/M_PI);
 
     /* Blink LED to indicate activity */
     blinkState = !blinkState;
     digitalWrite(LED_BUILTIN, blinkState);
     currentYaw = ypr[0] * 180 / M_PI;
   }
-
-
-
-  if (abs(currentYaw - angleDes) > 2) {
-    rotateClockwise();
-  } else {
-    stopMotors();
-    delay(5000); // Wait for 5 seconds //better to use millis() to keep looking at rotation changes
-    // Set new target yaw for the next 90° turn
-    angleDes = normalizeAngle(currentYaw + 90);
-  }
-
 }
 
 
@@ -205,12 +220,27 @@ void rotateClockwise() {
   // Set Motor A backward 
   digitalWrite(in1A, HIGH);
   digitalWrite(in2A, LOW);
-  analogWrite(pwmA, MotorSpeed1);
+  //analogWrite(pwmA, MotorSpeed1);
 
   // Set Motor B forward
   digitalWrite(in1B, LOW);
   digitalWrite(in2B, HIGH);
-  analogWrite(pwmB, MotorSpeed2);
+  //analogWrite(pwmB, MotorSpeed2);
+
+  float yawError = abs(normalizeAngle(angleDes - currentYaw));
+
+  if (yawError > 20) {
+    analogWrite(pwmA, 50);  // Full speed
+    analogWrite(pwmB, 50);  // Full speed
+  } else if (yawError > 10) {
+    analogWrite(pwmA, 40);  // Full speed
+    analogWrite(pwmB, 40);  // Full speed
+  } else {
+    analogWrite(pwmA, 30);  // Full speed
+    analogWrite(pwmB, 30);  // Full speed
+  }
+
+
 }
 
 void stopMotors() {
