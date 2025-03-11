@@ -38,17 +38,42 @@ const int startPin = 12;  // Best practice
 float angleDes = 90;
 float currentYaw = 0;
 
+/* ROBOT STURCTURE
+front is rolling ball
+
+LEFT motor
+encoder1
+motorA
+
+RIGHT motor
+encoder2
+motorB
+*/
+
+
+// Encoder 1
+const int encoder1PinA = 2;//3;//2; // Interrupt pin
+const int encoder1PinB = 15;//14;//15; // Regular digital pin
+// Encoder 2
+const int encoder2PinA = 3; // Interrupt pin
+const int encoder2PinB = 14; // Regular digital pin
+// Variable to keep track of the encoder position
+volatile long encoder1Position = 0;
+volatile long encoder2Position = 0;
 // Motor A
-int pwmA = 3;
-int in1A = 5; //used to be 2 but taken by interrupt of mpu
-int in2A = 4;
+int pwmA = 9;//5;
+int in1A = 7;//2; //used to be 3 but changed to save pwm output
+int in2A = 4;//4;
 // Motor B
-int pwmB = 11;
-int in1B = 7;
-int in2B = 8;
+int pwmB = 10;//6;
+int in1B = 8;//7;
+int in2B = 12;//8;
 // Motor Speed Values - Start at zero
 int MotorSpeed1 = 100;
 int MotorSpeed2 = 100;
+
+volatile float encoder1Dist = 0;
+volatile float encoder2Dist = 0;
 
 void setup() {
   // put your setup code here, to run once:
