@@ -15,10 +15,10 @@ Servo myServo;
 // int servoState = 0;
 
 //Ultrasound sensor settings
-// const int trigPin = 6;
-// const int echoPin = 13;
-// float duration, distance;
-// bool obstacle = false; 
+const int trigPin = 11;
+const int echoPin = 10;
+float duration, distance;
+bool obstacle = false; 
 
 MPU6050 mpu;
 
@@ -84,6 +84,8 @@ int in2B = 12;//8;
 // volatile float encoder2Dist = 0;
 
 void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   // put your setup code here, to run once:
   // Set the encoder pins as inputs
   pinMode(encoder1PinA, INPUT_PULLUP);
@@ -169,10 +171,10 @@ void setup() {
   delay(1000);
 
 
-  moveStraight(1.27876, 255);
+  moveStraight(1.27876, 80);
   // turnToAngle(90.0, 100);
   turnByAngle(-90.0, 100);
-  moveStraight(0.15,255);
+  moveStraight(0.15,80);
 
 }
 
@@ -184,6 +186,27 @@ void loop() {
   delay(500);
 }
 
+void distanceCheck() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH); //code blocks here until gets response (or times out, max 1 second)
+                                     //can set different timout like this: duration = pulseIn(echoPin, HIGH, 30000);  // Timeout in 30ms 
+  distance = (duration*.0343)/2;
+  Serial.print("Distance: ");
+  Serial.println(distance);
+  //delay(100);
+  if (distance < 10) {
+    obstacle = true;
+  } else {
+    obstacle = false;
+  }
+
+}
+
 
 void moveStraight(float distance, int baseSpeed) {
   encoder1Position = 0;
@@ -191,6 +214,13 @@ void moveStraight(float distance, int baseSpeed) {
   targetYaw = currentYaw; // Set target heading
 
   while (true) {
+    distanceCheck();
+
+    while (obstacle == true) {//later can include the distanceCheck in the while loop and the function should return true or false it's better
+      stopMotors();
+      distanceCheck();
+    }
+
     readIMU();
 
     
@@ -200,23 +230,24 @@ void moveStraight(float distance, int baseSpeed) {
     float correction = PIDControl(yawError);
 
     // Adjust motor speeds
-    int leftSpeed = baseSpeed + correction;
-    int rightSpeed = baseSpeed - correction;
+    int leftSpeed = baseSpeed - correction;
+    int rightSpeed = baseSpeed + correction;
     
     Serial.print("speed PWM: ");
     Serial.print(leftSpeed);
     Serial.print(" | ");
     Serial.println(rightSpeed);
 
-
-    digitalWrite(in1A, LOW);
-    digitalWrite(in2A, HIGH);
-    analogWrite(pwmA, constrain(leftSpeed, 50, 255));
+    //WARNING: when changing forward and backward you also have to inverse the signs
+    //in the encoder reading ISR and also inverse the sign of the correction on baseSpeed
+    digitalWrite(in1A, HIGH);
+    digitalWrite(in2A, LOW);
+    analogWrite(pwmA, constrain(leftSpeed, 50, 150));
 
     // Set Motor B forward
-    digitalWrite(in1B, LOW);
-    digitalWrite(in2B, HIGH);
-    analogWrite(pwmB, constrain(rightSpeed, 50, 255));
+    digitalWrite(in1B, HIGH);
+    digitalWrite(in2B, LOW);
+    analogWrite(pwmB, constrain(rightSpeed, 50, 150));
 
     // Serial.print("traveled dist: ");
     // Serial.println(traveledDistance);
@@ -235,6 +266,7 @@ void turnToAngle(float angle, int speed) {
   targetYaw = currentYaw + angle;
 
   while (true) {
+
     readIMU();
     float yawError = targetYaw - currentYaw;
     float correction = PIDControl(yawError);
@@ -265,6 +297,12 @@ void turnByAngle(float angle, int speed) {
 
 
   while (true) {
+    distanceCheck();
+    while (obstacle == true) {
+      stopMotors();
+      distanceCheck();
+    }
+
     readIMU();
     targetYaw = normalizeAngle(angleReal - currentYaw); //not really target yaw but angle difference shortest way +ive for clockwise
     float yawError = targetYaw;
@@ -387,16 +425,16 @@ void handleEncoder1() {
 
   if (digitalRead(encoder1PinA) == HIGH) {
     if (digitalRead(encoder1PinB) == LOW) {
-      encoder1Position++;
-    } else { 
       encoder1Position--;
+    } else { 
+      encoder1Position++;
     }
     
   } else {
     if (digitalRead(encoder1PinB) == HIGH) {
-      encoder1Position++;
-    } else {
       encoder1Position--;
+    } else {
+      encoder1Position++;
     }
   }
 }
@@ -406,16 +444,16 @@ void handleEncoder2() {
 
   if (digitalRead(encoder2PinA) == HIGH) {
     if (digitalRead(encoder2PinB) == LOW) {
-      encoder2Position--;
-    } else { 
       encoder2Position++;
+    } else { 
+      encoder2Position--;
     }
     
   } else {
     if (digitalRead(encoder2PinB) == HIGH) {
-      encoder2Position--;
-    } else {
       encoder2Position++;
+    } else {
+      encoder2Position--;
     }
   }
 }
