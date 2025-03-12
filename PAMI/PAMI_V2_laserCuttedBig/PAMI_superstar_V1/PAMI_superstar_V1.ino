@@ -3,6 +3,22 @@
 
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include <Servo.h> 
+
+
+//Servo settings
+// Declare the Servo pin 
+const int servoPin = 9;
+// Create a servo object 
+Servo myServo; 
+
+// int servoState = 0;
+
+//Ultrasound sensor settings
+// const int trigPin = 6;
+// const int echoPin = 13;
+// float duration, distance;
+// bool obstacle = false; 
 
 MPU6050 mpu;
 
@@ -56,11 +72,11 @@ volatile long encoder1Position = 0;
 volatile long encoder2Position = 0;
 
 // Motor A
-int pwmA = 9;//5;
+int pwmA = 5;//5;
 int in1A = 7;//2; //used to be 3 but changed to save pwm output
 int in2A = 4;//4;
 // Motor B
-int pwmB = 10;//6;
+int pwmB = 6;//6;
 int in1B = 8;//7;
 int in2B = 12;//8;
 
@@ -144,7 +160,14 @@ void setup() {
     // 2 = DMP configuration updates failed
   }
 
-  discardInitialReadings(1000);  // Discard the first 10 readings
+  discardInitialReadings(500);  // Discard the first 10 readings
+
+  // put your setup code here, to run once:
+  myServo.attach(servoPin);  
+
+  myServo.write(78);
+  delay(1000);
+
 
   moveStraight(1.27876, 255);
   // turnToAngle(90.0, 100);
@@ -154,8 +177,13 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+//  put your main code here, to run repeatedly:
+  myServo.write(100);
+  delay(500);
+  myServo.write(60);
+  delay(500);
 }
+
 
 void moveStraight(float distance, int baseSpeed) {
   encoder1Position = 0;
