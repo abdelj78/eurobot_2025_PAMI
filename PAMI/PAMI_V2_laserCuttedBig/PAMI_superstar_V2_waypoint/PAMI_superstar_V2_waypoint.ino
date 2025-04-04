@@ -1,5 +1,4 @@
-//Code for the superstar PAMI, simple commands of translation and rotation for now with attempt
-//to integrate servo motor with ultrasound sensor, gyro (without interrupt) etc
+//Code for the superstar PAMI, trying to implement waypoint path following without obstable avoidance for now 
 
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -82,6 +81,22 @@ int in2B = 12;//8;
 
 // volatile float encoder1Dist = 0;
 // volatile float encoder2Dist = 0;
+
+struct Waypoint {
+  float x;
+  float y;
+};
+
+Waypoint waypoints[] = {
+  {0.0, 0.2},
+  {0.2, 0.2},
+  {0.2, 0.0},
+  {0.0, 0.0}
+};
+
+int currentWaypointIndex = 0;
+float currentX = 0;
+float currentY = 0;
 
 void setup() {
   pinMode(trigPin, OUTPUT);
@@ -170,41 +185,58 @@ void setup() {
   myServo.write(78);
   delay(1000);
 
-  // //SUPERSTAR BLUE
-  moveStraight(1.27876, 80);
-  turnByAngle(-90.0, 100);
-  moveStraight(0.15,80);
 
-  // //GROUPIE BLUE CLOSE
-  // moveStraight(0.35, 80);
-  // turnByAngle(-90, 100);
-  // moveStraight(0.3, 80);
-  // turnByAngle(90, 100);
-  // moveStraight(0.55, 80);  
+  // moveStraight(1.27876, 80);
+  // // turnToAngle(90.0, 100);
+  // turnByAngle(-90.0, 100);
+  // moveStraight(0.15,80);
 
-  // //GROUPIE BLUE MIDDLE
-  // moveStraight(0.25, 80);
-  // turnByAngle(-90, 100);
-  // moveStraight(0.3, 80);
-  // turnByAngle(90, 100);
-  // moveStraight(1.25, 80);  
-
-  // // //GROUPIE BLUE FURTHEST
-//   moveStraight(0.15, 80);
-//   turnByAngle(-90, 100);
-//   moveStraight(0.3, 80);
-//   turnByAngle(90, 100);
-//   moveStraight(1.7, 80);  
-//   turnByAngle(90, 100);
-//   moveStraight(0.15, 80);  
 }
 
 void loop() {
-//  put your main code here, to run repeatedly:
-  myServo.write(100);
-  delay(500);
-  myServo.write(60);
-  delay(500);
+  //  put your main code here, to run repeatedly:
+  //checking if all the waypoints have been done
+  //sizeof(waypoints) is going to be 32 because it has 32 bytes because 
+  //each float is 4 bytes and there are 8 floats in the array 4 Xs and 4 Ys
+  //sizeof(waypoints[0]) is 8 because it's the size of the first element in the array {1.0, 1.0}
+  //so the result is 4, so it ensures that the currentWaypointIndex is less than 4 (in the original example)
+  //basically checks if the currentWaypointIndex is less than the number of waypoints
+
+
+  if (currentWaypointIndex < sizeof(waypoints) / sizeof(waypoints[0])) {
+    Waypoint target = waypoints[currentWaypointIndex];
+    moveToWaypoint(target, 80);
+    currentWaypointIndex++;
+  } else {
+    stopMotors();
+  }
+
+  delay(100);
+
+
+  // myServo.write(100);
+  // delay(500);
+  // myServo.write(60);
+  // delay(500);
+}
+
+void moveToWaypoint(Waypoint target, int baseSpeed) {
+  float distance = calculateDistance(currentX, currentY, target.x, target.y);
+  float heading = calculateHeading(currentX, currentY, target.x, target.y);
+
+  turnByAngle(heading, baseSpeed);
+  moveStraight(distance, baseSpeed);
+
+  currentX = target.x;
+  currentY = target.y;
+}
+
+float calculateDistance(float x1, float y1, float x2, float y2) {
+  return sqrt(sq(x2 - x1) + sq(y1 - y2));
+}
+
+float calculateHeading(float x1, float y1, float x2, float y2) {
+  return atan2(y2 - y1, x2 - x1) * 180 / PI;
 }
 
 void distanceCheck() {
@@ -418,7 +450,7 @@ void readIMU() {
           mpu.dmpGetQuaternion(&q, FIFOBuffer);
           mpu.dmpGetGravity(&gravity, &q);
           mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-          currentYaw = ypr[0] * 180 / M_PI;
+          currentYaw = (ypr[0] * 180 / M_PI)*-1;
       }
   }
 

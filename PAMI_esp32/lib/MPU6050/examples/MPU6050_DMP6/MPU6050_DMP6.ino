@@ -127,20 +127,18 @@ void setup() {
   Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
 
-
-  //HERE, EITHER YOU SET THE OFFSETS IS THE CALLIBRATION HAS BEEN DONE BEFORE OR USEDCALIBRATE FUNCTIONS BELLOW
   /* Supply your gyro offsets here, scaled for min sensitivity */
-//  mpu.setXGyroOffset(144);
-//  mpu.setYGyroOffset(28);
-//  mpu.setZGyroOffset(61);
-//  mpu.setXAccelOffset(-272);
-//  mpu.setYAccelOffset(-2003);
-//  mpu.setZAccelOffset(580);
+  mpu.setXGyroOffset(0);
+  mpu.setYGyroOffset(0);
+  mpu.setZGyroOffset(0);
+  mpu.setXAccelOffset(0);
+  mpu.setYAccelOffset(0);
+  mpu.setZAccelOffset(0);
 
   /* Making sure it worked (returns 0 if so) */ 
   if (devStatus == 0) {
-    mpu.CalibrateAccel(10);  // Calibration Time: generate offsets and calibrate our MPU6050
-    mpu.CalibrateGyro(10);
+    mpu.CalibrateAccel(6);  // Calibration Time: generate offsets and calibrate our MPU6050
+    mpu.CalibrateGyro(6);
     Serial.println("These are the Active offsets: ");
     mpu.PrintActiveOffsets();
     Serial.println(F("Enabling DMP..."));   //Turning ON DMP
@@ -165,7 +163,7 @@ void setup() {
     // 1 = initial memory load failed
     // 2 = DMP configuration updates failed
   }
-  pinMode(2, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
@@ -257,6 +255,6 @@ void loop() {
 
   /* Blink LED to indicate activity */
   blinkState = !blinkState;
-  digitalWrite(2, blinkState);
+  digitalWrite(LED_BUILTIN, blinkState);
   }
 }

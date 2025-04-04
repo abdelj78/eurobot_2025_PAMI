@@ -29,8 +29,8 @@ int in2B = 12;//8;
 
 // Motor Speed Values - Start at zero
 
-int MotorSpeed1 = 100;
-int MotorSpeed2 = 100;
+int MotorSpeed1 = 255;
+int MotorSpeed2 = 255;
 
 void setup()
 
