@@ -1,15 +1,11 @@
-#include "mpu_test.h"
+#include "mpu.h"
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
 // MPU6050 default I2C address is 0x68
 MPU6050 mpu;
 
-// Output format definition
-#define OUTPUT_READABLE_YAWPITCHROLL
-
 int const INTERRUPT_PIN = 23;  // Define the interruption #0 pin
-bool blinkState;
 
 // MPU6050 Control/Status Variables
 bool DMPReady = false;  // Set true if DMP init was successful
@@ -28,6 +24,10 @@ VectorFloat gravity;    // [x, y, z]            Gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   Yaw/Pitch/Roll container and gravity vector
 
+float currentYaw = 0; // Variable to store the current yaw angle
+//float targetYaw = 0; // Variable to store the target yaw angle
+
+
 // Packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0x00, 0x00, '\r', '\n' };
 
@@ -45,8 +45,8 @@ void mpuSetup() {
     Fastwire::setup(400, true);
   #endif
   
-  Serial.begin(115200); //115200 is required for Teapot Demo output
-  while (!Serial);
+  //Serial.begin(115200); //115200 is required for Teapot Demo output
+  //while (!Serial);
 
   // Initialize device
   Serial.println(F("Initializing I2C devices..."));
@@ -63,23 +63,9 @@ void mpuSetup() {
     Serial.println("MPU6050 connection successful");
   }
 
-  // Wait for Serial input
-  Serial.println(F("\nSend any character to begin: "));
-  while (Serial.available() && Serial.read()); // Empty buffer
-  while (!Serial.available());                 // Wait for data
-  while (Serial.available() && Serial.read()); // Empty buffer again
-
   // Initialize and configure the DMP
   Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
-
-  // Supply your gyro offsets here, scaled for min sensitivity
-  // mpu.setXGyroOffset(144);
-  // mpu.setYGyroOffset(28);
-  // mpu.setZGyroOffset(61);
-  // mpu.setXAccelOffset(-272);
-  // mpu.setYAccelOffset(-2003);
-  // mpu.setZAccelOffset(580);
 
   // Make sure it worked (returns 0 if so)
   if (devStatus == 0) {
@@ -109,38 +95,47 @@ void mpuSetup() {
     // 1 = initial memory load failed
     // 2 = DMP configuration updates failed
   }
-  pinMode(2, OUTPUT);
+  discardInitialReadings(500);  // Discard the first 10 readings to stabilize the sensor
+  //pinMode(2, OUTPUT);
 }
 
 void mpuLoop() {
-  if (!DMPReady) return; // Stop the program if DMP programming fails.
-  
-  // Check if MPU interrupt has occurred
-  if (MPUInterrupt) {
-    MPUInterrupt = false; // Reset interrupt flag
 
-    // Read a packet from FIFO
-    if (mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) { // Get the Latest packet 
-      #ifdef OUTPUT_READABLE_YAWPITCHROLL
-        // Update Euler angles in degrees
-        mpu.dmpGetQuaternion(&q, FIFOBuffer);
-        mpu.dmpGetGravity(&gravity, &q);
-        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      #endif
+}
 
-      // Display the updated Euler angles
-      #ifdef OUTPUT_READABLE_YAWPITCHROLL
-        Serial.print("ypr\t");
-        Serial.print(ypr[0] * 180/M_PI);
-        Serial.print("\t");
-        Serial.print(ypr[1] * 180/M_PI);
-        Serial.print("\t");
-        Serial.println(ypr[2] * 180/M_PI);
-      #endif
+void readIMU() {
+    if (MPUInterrupt) { // Check if MPU interrupt has occurred
+        MPUInterrupt = false; // Reset interrupt flag
+        
+        MPUIntStatus = mpu.getIntStatus();
 
-      // Blink LED to indicate activity
-      blinkState = !blinkState;
-      digitalWrite(2, blinkState);
+        // Check for overflow
+        if ((MPUIntStatus & 0x10) || mpu.getFIFOCount() >= 1024) {
+            Serial.println("FIFO overflow!");
+            mpu.resetFIFO();
+            return;
+        }
+
+        if (mpu.getFIFOCount() >= packetSize) { // Ensure FIFO has enough data
+            if (mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) { // Get new data from FIFO
+                mpu.dmpGetQuaternion(&q, FIFOBuffer); // Get quaternion data
+                mpu.dmpGetGravity(&gravity, &q); // Get gravity vector
+                mpu.dmpGetYawPitchRoll(ypr, &q, &gravity); // Get yaw, pitch, roll angles
+                currentYaw = ypr[0] * 180 / M_PI; // Convert yaw to degrees
+            }
+
+        }
     }
-  }
+
+}
+
+void discardInitialReadings(int numReadings) {
+    for (int i = 0; i < numReadings; i++) {
+        if (mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) {
+            mpu.dmpGetQuaternion(&q, FIFOBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+        }
+        delay(10);  // Small delay to let the sensor stabilize
+    }
 }
