@@ -22,6 +22,9 @@ void setup() {
     // moveStraight(1.27876, 80);
     // turnByAngle(-90.0, 100);
     // moveStraight(0.15,80);
+    moveStraight(1.26076, 120);
+    turnByAngle(-90.0, 100);
+    moveStraight(0.247,120);
   
     // //GROUPIE BLUE CLOSE
     // moveStraight(0.35, 80);
@@ -38,13 +41,13 @@ void setup() {
     // moveStraight(1.25, 80);  
 
     // // //GROUPIE BLUE FURTHEST
-    moveStraight(0.15, 80);
-    turnByAngle(-90, 100);
-    moveStraight(0.3, 80);
-    turnByAngle(90, 100);
-    moveStraight(1.7, 80);  
-    turnByAngle(90, 100);
-    moveStraight(0.15, 80);  
+    // moveStraight(0.15, 80);
+    // turnByAngle(-90, 100);
+    // moveStraight(0.3, 80);
+    // turnByAngle(90, 100);
+    // moveStraight(1.7, 80);  
+    // turnByAngle(90, 100);
+    // moveStraight(0.15, 80);  
 
 }
 
