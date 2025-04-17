@@ -4,27 +4,47 @@
 #include "servo.h"
 #include "mpu.h"
 #include "ultrasound.h"
+#include "general_pins.h"
 
-#define TEST_PIN 36 // GPIO pin for testing
+//#define TEST_PIN 36 // GPIO pin for testing
 
 void setup() {
     Serial.begin(115200);
+
     mpuSetup();
     ultrasoundSetup();
+    motorSetup();
+    servoSetup(); // Initialize servo control
+
+    generalPinsSetup(); // Initialize general pins
+    waitUswitchRelease(); // Wait for the micro-switch to be released
+    delay(1000); // Delay for 1 second to ensure the switch is stable
+
+    if (blue_flag) { // if blue selected
+    // latest pami version size
+        moveStraight(1.26076, 120);
+        turnByAngle(-90.0, 100);
+        moveStraight(0.247,120);
+    } else {
+        moveStraight(1.26076, 120);
+        turnByAngle(90.0, 100);
+        moveStraight(0.247,120);  
+    }
+
+
 
     // Serial.println("Setup started.");
-    motorSetup();
+
     //pinMode(TEST_PIN, INPUT_PULLUP); // Set GPIO 19 as output for LED
-    //servoSetup(); // Initialize servo control
+
     //moveForwardFor(0.5, 100); // Move forward for 0.5 seconds at speed 180
     
     // //SUPERSTAR BLUE
     // moveStraight(1.27876, 80);
     // turnByAngle(-90.0, 100);
     // moveStraight(0.15,80);
-    moveStraight(1.26076, 120);
-    turnByAngle(-90.0, 100);
-    moveStraight(0.247,120);
+
+
   
     // //GROUPIE BLUE CLOSE
     // moveStraight(0.35, 80);
@@ -48,6 +68,8 @@ void setup() {
     // moveStraight(1.7, 80);  
     // turnByAngle(90, 100);
     // moveStraight(0.15, 80);  
+
+    servoLoop(); // Control the servo
 
 }
 
