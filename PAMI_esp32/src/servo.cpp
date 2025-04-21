@@ -55,13 +55,13 @@ void servoSetup() {
 void servoLoop() {
   while (true) {
     // Sweep 0 to 180
-    for (int pos = 45; pos <= 135; pos++) {
+    for (int pos = 45; pos <= 100; pos++) {
       myServo.write(pos);
       delay(10);  // small delay for smooth motion
     }
 
     // Sweep 180 back to 0
-    for (int pos = 135; pos >= 45; pos--) {
+    for (int pos = 100; pos >= 45; pos--) {
       myServo.write(pos);
       delay(10);
     }

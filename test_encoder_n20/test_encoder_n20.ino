@@ -1,6 +1,6 @@
 // Encoder 1
-const int encoder1PinA = 2;//3;//2; // Interrupt pin
-const int encoder1PinB = 15;//14;//15; // Regular digital pin
+const int encoder1PinA = 39;//3;//2; // Interrupt pin
+const int encoder1PinB = 36;//14;//15; // Regular digital pin
 
 // Encoder 2
 // const int encoder2PinA = 3; // Interrupt pin

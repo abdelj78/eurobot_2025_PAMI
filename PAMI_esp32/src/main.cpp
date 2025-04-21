@@ -9,6 +9,8 @@
 //#define TEST_PIN 36 // GPIO pin for testing
 
 void setup() {
+    //PAMI CODE
+    
     Serial.begin(115200);
 
     mpuSetup();
@@ -19,6 +21,7 @@ void setup() {
     generalPinsSetup(); // Initialize general pins
     waitUswitchRelease(); // Wait for the micro-switch to be released
     delay(1000); // Delay for 1 second to ensure the switch is stable
+    //blue_flag = false; // Initialize blue_flag to false
 
     if (blue_flag) { // if blue selected
     // latest pami version size
@@ -70,6 +73,7 @@ void setup() {
     // moveStraight(0.15, 80);  
 
     servoLoop(); // Control the servo
+    
 
 }
 
