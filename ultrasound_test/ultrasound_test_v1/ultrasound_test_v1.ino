@@ -6,8 +6,12 @@
  * by Isaac100
  */
 
-const int trigPin = 9;
-const int echoPin = 10;
+const int trigPin = 25; // 9;
+const int echoPin = 33; //10;
+
+unsigned long start_time = 0;
+unsigned long end_time = 0;
+unsigned long time_spent = 0;
 
 float duration, distance;
 
@@ -23,9 +27,14 @@ void loop() {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
-
+  start_time = micros();
   duration = pulseIn(echoPin, HIGH); //code blocks here until gets response (or times out, max 1 second)
                                      //can set different timout like this: duration = pulseIn(echoPin, HIGH, 30000);  // Timeout in 30ms 
+  end_time = micros();
+  time_spent = end_time - start_time;
+  Serial.print("time spent = ");
+  Serial.println(time_spent);
+
   distance = (duration*.0343)/2;
   Serial.print("Distance: ");
   Serial.println(distance);

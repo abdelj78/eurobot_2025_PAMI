@@ -26,18 +26,62 @@ void distanceCheck() {
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
   
-    duration = pulseIn(echoPin, HIGH); //code blocks here until gets response (or times out, max 1 second)
+    duration = pulseIn(echoPin, HIGH, 10000); //code blocks here until gets response (or times out, max 1 second)
                                        //can set different timout like this: duration = pulseIn(echoPin, HIGH, 30000);  // Timeout in 30ms 
     distance = (duration*.0343)/2;
     Serial.print("Distance: ");
     Serial.println(distance);
     //delay(100);
-    if (distance < 10) {
+    if (distance < 10 && distance > 0) { // Check if the distance is less than 10 cm and greater than 0 cm
+      //here we add it larger than 0 to avoid false positives when the sensor is not detecting anything
+      //occurs when obstacle is very far away or not plugged in
       obstacle = true;
     } else {
       obstacle = false;
     }
   
   }
+
+
+////Alternative: Non-Blocking Method (Avoid pulseIn())
+////
+////Instead of using pulseIn(), you can use interrupts for better performance:
+//
+//volatile long startTime, endTime;
+//volatile bool received = false;
+//
+//void echoISR() {
+//  if (digitalRead(echoPin) == HIGH) {
+//    startTime = micros();
+//  } else {
+//    endTime = micros();
+//    received = true;
+//  }
+//}
+//
+//void ultrasoundSetup() {
+//  pinMode(trigPin, OUTPUT);
+//  pinMode(echoPin, INPUT);
+//  attachInterrupt(digitalPinToInterrupt(echoPin), echoISR, CHANGE);
+//  Serial.begin(9600);
+//}
+//
+//void loop() {
+//  digitalWrite(trigPin, LOW);
+//  delayMicroseconds(2);
+//  digitalWrite(trigPin, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(trigPin, LOW);
+//
+//  if (received) {
+//    long duration = endTime - startTime;
+//    float distance = (duration * 0.0343) / 2;
+//    Serial.print("Distance: ");
+//    Serial.println(distance);
+//    received = false;
+//  }
+//
+//  delay(100);
+//}
 
   

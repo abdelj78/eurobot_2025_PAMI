@@ -67,6 +67,10 @@ void mpuSetup() {
   Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
 
+  //the following was used for when had issue with fifo overflow due to ultrasound sensor
+  // Add this to mpuSetup() after dmpInitialize()
+  //mpu.setDMPConfig1(0x03);  // Sets DMP sample rate to 100Hz (instead of 200Hz default)
+
   // Make sure it worked (returns 0 if so)
   if (devStatus == 0) {
     mpu.CalibrateAccel(10);  // Calibration Time: generate offsets and calibrate our MPU6050
@@ -112,6 +116,17 @@ void readIMU() {
         // Check for overflow
         if ((MPUIntStatus & 0x10) || mpu.getFIFOCount() >= 1024) {
             Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            Serial.println("FIFO overflow!");
+            
             mpu.resetFIFO();
             return;
         }
@@ -128,6 +143,36 @@ void readIMU() {
     }
 
 }
+
+// the following was used for when had issue with fifo overflow due to ultrasound sensor
+//improved version of readIMU function because of fifo overflow but not sure
+// how it works yet, used Claude's code as a reference
+// void readIMU() {
+//   if (MPUInterrupt) {
+//       MPUInterrupt = false;
+      
+//       MPUIntStatus = mpu.getIntStatus();
+//       uint16_t fifoCount = mpu.getFIFOCount();
+
+//       // Check for overflow
+//       if ((MPUIntStatus & 0x10) || fifoCount >= 1024) {
+//           Serial.println("FIFO overflow!");
+//           mpu.resetFIFO();
+//           return;
+//       }
+      
+//       // Process all available packets at once
+//       while (fifoCount >= packetSize) {
+//           if (mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) {
+//               mpu.dmpGetQuaternion(&q, FIFOBuffer);
+//               mpu.dmpGetGravity(&gravity, &q);
+//               mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+//               currentYaw = ypr[0] * 180 / M_PI;
+//           }
+//           fifoCount -= packetSize;
+//       }
+//   }
+// }
 
 void discardInitialReadings(int numReadings) {
     for (int i = 0; i < numReadings; i++) {
