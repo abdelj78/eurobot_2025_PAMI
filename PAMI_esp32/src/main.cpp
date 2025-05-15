@@ -9,6 +9,7 @@
 //#define TEST_PIN 36 // GPIO pin for testing
 
 void setup() {
+    //servoSetup();
     //PAMI CODE
     
     Serial.begin(115200);

@@ -73,3 +73,42 @@ void servoLoop() {
     // myServo.write(180); // Set servo to 90 degrees  
     // delay(1000); // Wait for 1 second
 }
+
+// // test for dsservo with esp32
+// #include <Arduino.h>
+// #include <ESP32Servo.h>
+
+// Servo myServo;
+
+// int servoPin = 32; // GPIO pin for the servo
+
+// void servoSetup() {
+//   myServo.setPeriodHertz(50); // Standard 50Hz servo, it's weird but should be 500hz as
+//   // we want 20ms period but works weirdly with 500hz
+//   myServo.attach(servoPin, 500, 2500);          // pin, min & max pulse widths in µs
+// }
+
+// void servoLoop() {
+//   while (true) {
+//     // Sweep 0 to 180
+//     for (int pos = 0; pos <= 270; pos++) {
+//       myServo.write(pos);
+//       delay(10);  // small delay for smooth motion
+//     }
+
+//     delay(1000); // Wait for 1 second at 270 degrees
+
+//     // Sweep 180 back to 0
+//     for (int pos = 270; pos >= 0; pos--) {
+//       myServo.write(pos);
+//       delay(10);
+//     }
+//     delay(1000); // Wait for 1 second at 0 degrees
+//   }
+
+
+//     // myServo.write(0); // Set servo to 0 degrees
+//     // delay(1000); // Wait for 1 second
+//     // myServo.write(180); // Set servo to 90 degrees  
+//     // delay(1000); // Wait for 1 second
+// }
