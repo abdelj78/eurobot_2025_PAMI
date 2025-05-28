@@ -50,18 +50,19 @@ int servoPin = 32; // GPIO pin for the servo
 void servoSetup() {
   myServo.setPeriodHertz(50);             // Standard 50Hz servo
   myServo.attach(servoPin, 500, 2400);          // pin, min & max pulse widths in µs
+  myServo.write(180); // Set servo to 150 degrees
 }
 
 void servoLoop() {
   while (true) {
     // Sweep 0 to 180
-    for (int pos = 45; pos <= 100; pos++) {
+    for (int pos = 150; pos <= 180; pos++) {
       myServo.write(pos);
       delay(10);  // small delay for smooth motion
     }
 
     // Sweep 180 back to 0
-    for (int pos = 100; pos >= 45; pos--) {
+    for (int pos = 180; pos >= 150; pos--) {
       myServo.write(pos);
       delay(10);
     }

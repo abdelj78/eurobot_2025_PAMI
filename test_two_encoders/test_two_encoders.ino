@@ -1,10 +1,10 @@
 // Encoder 1
-const int encoder1PinA = 2;//3;//2; // Interrupt pin
-const int encoder1PinB = 15;//14;//15; // Regular digital pin
+const int encoder1PinA = 39;//2;//3;//2; // Interrupt pin
+const int encoder1PinB = 36;//15;//14;//15; // Regular digital pin
 
 // Encoder 2
-const int encoder2PinA = 3; // Interrupt pin
-const int encoder2PinB = 14; // Regular digital pin
+const int encoder2PinA = 35;//3; // Interrupt pin
+const int encoder2PinB = 34;//14; // Regular digital pin
 
 // Variable to keep track of the encoder position
 volatile long encoder1Position = 0;

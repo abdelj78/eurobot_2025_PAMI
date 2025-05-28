@@ -7,5 +7,6 @@ extern bool obstacle;
 void ultrasoundSetup();
 void ultrasoundLoop();
 void distanceCheck();
+void distanceCheck2();
 
 #endif // MPU_TEST_H

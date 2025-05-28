@@ -4,6 +4,7 @@
 
 // MPU6050 default I2C address is 0x68
 MPU6050 mpu;
+volatile float yawOffset = 0.0;  // Initialize to zero
 
 int const INTERRUPT_PIN = 23;  // Define the interruption #0 pin
 
@@ -23,8 +24,9 @@ VectorInt16 aaWorld;    // [x, y, z]            World-frame accel sensor measure
 VectorFloat gravity;    // [x, y, z]            Gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   Yaw/Pitch/Roll container and gravity vector
+//now defined in mpu.h
 
-float currentYaw = 0; // Variable to store the current yaw angle
+volatile float currentYaw = 0; // Variable to store the current yaw angle
 //float targetYaw = 0; // Variable to store the target yaw angle
 
 
@@ -32,7 +34,7 @@ float currentYaw = 0; // Variable to store the current yaw angle
 uint8_t teapotPacket[14] = { '$', 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0x00, 0x00, '\r', '\n' };
 
 // Interrupt detection routine
-volatile bool MPUInterrupt = false;     // Indicates whether MPU6050 interrupt pin has gone high
+volatile bool MPUInterrupt = false;     //now defined in .h. Indicates whether MPU6050 interrupt pin has gone high
 void IRAM_ATTR DMPDataReady() {
   MPUInterrupt = true;
 }
@@ -77,6 +79,10 @@ void mpuSetup() {
     mpu.CalibrateGyro(10);
     Serial.println("These are the Active offsets: ");
     mpu.PrintActiveOffsets();
+
+    // Lower the gyro sensitivity to reduce drift
+    //mpu.setFullScaleGyroRange(MPU6050_GYRO_FS_500);
+
     Serial.println(F("Enabling DMP..."));   // Turning ON DMP
     mpu.setDMPEnabled(true);
 
@@ -184,3 +190,102 @@ void discardInitialReadings(int numReadings) {
         delay(10);  // Small delay to let the sensor stabilize
     }
 }
+
+
+
+void readIMU2() {
+
+  MPUInterrupt = false; // Reset interrupt flag
+  
+  MPUIntStatus = mpu.getIntStatus();
+
+  // Check for overflow
+  if ((MPUIntStatus & 0x10) || mpu.getFIFOCount() >= 1024) {
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      Serial.println("FIFO overflow!");
+      
+      mpu.resetFIFO();
+      return;
+  }
+
+  if (mpu.getFIFOCount() >= packetSize) { // Ensure FIFO has enough data
+      if (mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) { // Get new data from FIFO
+          mpu.dmpGetQuaternion(&q, FIFOBuffer); // Get quaternion data
+          mpu.dmpGetGravity(&gravity, &q); // Get gravity vector
+          mpu.dmpGetYawPitchRoll(ypr, &q, &gravity); // Get yaw, pitch, roll angles
+          //currentYaw = ypr[0] * 180 / M_PI; // Convert yaw to degrees
+      }
+
+  }
+
+
+}
+
+//the following is a method called bias compensation
+// it uses acclerometre data to determine if the robot is stationary
+// and if so, it updates the yaw bias. This is useful for correcting drift
+// in the yaw angle. can also do the same thing with encoders but need to manage 
+// data across cores etc. for now we don't need to do this as imu is good enough especially for pamis.
+
+// void readIMU2() {
+//     // Your existing code
+//     MPUInterrupt = false;
+//     MPUIntStatus = mpu.getIntStatus();
+    
+//     // Check for overflow...
+    
+//     if (mpu.getFIFOCount() >= packetSize) {
+//         if (mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) {
+//             mpu.dmpGetQuaternion(&q, FIFOBuffer);
+//             mpu.dmpGetGravity(&gravity, &q);
+//             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+//             mpu.dmpGetAccel(&aa, FIFOBuffer);
+            
+//             // Bias compensation
+//             static float yawBias = 0;
+//             static unsigned long lastBiasUpdate = 0;
+//             static int stationaryCounter = 0;
+            
+//             // Calculate acceleration magnitude
+//             float accelMagnitude = sqrt(aa.x*aa.x + aa.y*aa.y + aa.z*aa.z);
+            
+//             // Detect if stationary (acceleration close to gravity)
+//             bool isStationary = (abs(accelMagnitude - 16384) < 200);
+            
+//             if (isStationary) {
+//                 stationaryCounter++;
+                
+//                 // After 1 second of being stationary
+//                 if (stationaryCounter > 50 && millis() - lastBiasUpdate > 3000) {
+//                     float rawYaw = ypr[0] * 180 / M_PI;
+//                     yawBias = 0.98 * yawBias + 0.02 * rawYaw;
+//                     lastBiasUpdate = millis();
+//                 }
+//             } else {
+//                 stationaryCounter = 0;
+//             }
+            
+//             // Apply bias correction
+//             currentYaw = (ypr[0] * 180 / M_PI) - yawBias;
+            
+//             // Debug output occasionally
+//             static unsigned long lastDebugOutput = 0;
+//             if (millis() - lastDebugOutput > 5000) {
+//                 Serial.print("Current bias: ");
+//                 Serial.print(yawBias);
+//                 Serial.print(", Stationary: ");
+//                 Serial.println(isStationary ? "YES" : "NO");
+//                 lastDebugOutput = millis();
+//             }
+//         }
+//     }
+// }
