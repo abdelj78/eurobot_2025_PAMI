@@ -224,7 +224,7 @@ void navigateToWaypoint(Waypoint waypoint) {
     // Then move to the waypoint
     Serial.print("Moving distance: ");
     Serial.println(distToWaypoint);
-    moveStraight3(distToWaypoint, 255);
+    moveStraight3(distToWaypoint, 180); // pre-homologation was 255 but seem to much as stop too close to objects and misses some obstacles
       // Calculate distance traveled
     float distanceTraveled = (encoderLPosition + encoderRPosition) / (2.0 * 6777.0);
         // Update position using the heading we were moving in and distance traveled

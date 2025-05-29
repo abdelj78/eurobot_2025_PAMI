@@ -9,4 +9,7 @@ void ultrasoundLoop();
 void distanceCheck();
 void distanceCheck2();
 
+void obstacleDetect ();
+void obstacleClear() ;
+
 #endif // MPU_TEST_H

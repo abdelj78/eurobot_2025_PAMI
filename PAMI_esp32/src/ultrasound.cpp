@@ -44,7 +44,57 @@ void distanceCheck() {
 
 
 void distanceCheck2() {
-  for (int i = 0; i < 4; i++) { // Take 5 to not have the robot slightly moving if misreads one time
+  for (int i = 0; i < 4; i++) { //was 4 checks before homologation issue, Take 5 to not have the robot slightly moving if misreads one time
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+  
+    duration = pulseIn(echoPin, HIGH, 30000); //code blocks here until gets response (or times out, max 1 second)
+                                       //can set different timout like this: duration = pulseIn(echoPin, HIGH, 30000);  // Timeout in 30ms 
+    distance = (duration*.0343)/2;
+    // Serial.print("Distance: ");
+    // Serial.println(distance);
+    //delay(100);
+    if (distance < 10 && distance > 0) { // Check if the distance is less than 10 cm and greater than 0 cm
+      //here we add it larger than 0 to avoid false positives when the sensor is not detecting anything
+      //occurs when obstacle is very far away or not plugged in
+      obstacle = true;
+      break;
+    } else {
+      obstacle = false;
+    }
+  }
+}
+
+void obstacleDetect (){
+  for (int i = 0; i < 4; i++) { //was 4 checks before homologation issue, Take 5 to not have the robot slightly moving if misreads one time
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+  
+    duration = pulseIn(echoPin, HIGH, 30000); //code blocks here until gets response (or times out, max 1 second)
+                                       //can set different timout like this: duration = pulseIn(echoPin, HIGH, 30000);  // Timeout in 30ms 
+    distance = (duration*.0343)/2;
+    // Serial.print("Distance: ");
+    // Serial.println(distance);
+    //delay(100);
+    if (distance < 10 && distance > 0) { // Check if the distance is less than 10 cm and greater than 0 cm
+      //here we add it larger than 0 to avoid false positives when the sensor is not detecting anything
+      //occurs when obstacle is very far away or not plugged in
+      obstacle = true;
+      break;
+    } else {
+      obstacle = false;
+    }
+  }
+}
+
+void obstacleClear() {
+  for (int i = 0; i < 20; i++) { //was 4 checks before homologation issue, Take 5 to not have the robot slightly moving if misreads one time
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);

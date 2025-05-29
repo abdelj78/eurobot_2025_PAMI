@@ -22,8 +22,11 @@ void generalPinsSetup() {
     pinMode(led_red, OUTPUT);
     pinMode(led_yellow, OUTPUT);
     pinMode(led_blue, OUTPUT);
+    
+    digitalWrite(led_red, LOW); // Turn off red LED
 
-    digitalWrite(led_red, HIGH); // Turn off red LED
+
+    
 
     while (digitalRead(clr_conf) == HIGH) {
         if (digitalRead(clr_select) == LOW) {
@@ -56,6 +59,8 @@ void generalPinsSetup() {
         delay(200);
         digitalWrite(led_yellow, HIGH); // Turn on yellow LED
     }
+
+    digitalWrite(led_red, HIGH); // Turn off red LED
 
 
 }

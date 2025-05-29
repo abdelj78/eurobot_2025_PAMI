@@ -7,7 +7,7 @@
 #include "navigation.h"
 
 
-int ROBOT_NB = 1; // 1= Super
+//int ROBOT_NB = 1; // 1= Super
 
 // Define waypoints for blue side
 // Waypoint blueWaypoints[] = {
@@ -16,25 +16,30 @@ int ROBOT_NB = 1; // 1= Super
 //     {0.0, 0.0, 0.0, true} // Optional waypoint for testing
 // };
 
-////////SUPERSTAR//////
-//BLUE
-// define initial position and orientation
-float initialXb = 1.932; // Initial X position in meters
-float initialYb = 2.9482; // Initial Y position in meters
-float initialOrientationb = -90.0; // Initial orientation in degrees
-Waypoint blueWaypoints[] = {
-    {1.932, 1.800, -90, true},    // Move forward, then turn left
-    {1.619025, 1.800, -180.0, true},     // Move to final position
-};
-//YELLOW
-// define initial position and orientation
-float initialXy = 1.932; // Initial X position in meters
-float initialYy = 0.0518; // Initial Y position in meters
-float initialOrientationy = 90.0; // Initial orientation in degrees
-Waypoint yellowWaypoints[] = {   // Move forward, then turn left
-    {1.932, 1.200, 90, true}, 
-    {1.619025 , 1.200, 180, true }    // Move to final position
-};
+// ////////SUPERSTAR//////
+// //BLUE
+// // define initial position and orientation
+// float initialXb = 1.932; // Initial X position in meters
+// float initialYb = 2.9482; // Initial Y position in meters
+// float initialOrientationb = -90.0; // Initial orientation in degrees
+// Waypoint blueWaypoints[] = {
+//     // {1.932, 1.800, -90, true},    // Move forward, then turn left
+//     // {1.619025, 1.800, -180.0, true},     // Move to final position
+//     {1.932, 1.800, -667, true},    // Move forward, then turn left
+//     {1.619025, 1.800, -667, true},     // Move to final position
+// };
+// //YELLOW
+// // define initial position and orientation
+// float initialXy = 1.932; // Initial X position in meters
+// float initialYy = 0.0518; // Initial Y position in meters
+// float initialOrientationy = 90.0; // Initial orientation in degrees
+// Waypoint yellowWaypoints[] = {   // Move forward, then turn left
+//     // {1.932, 1.200, 90, true}, 
+//     // {1.619025 , 1.200, 180, true }    // Move to final position
+//     {1.932, 1.200, -667, true}, 
+//     {1.619025 , 1.200, -667, true }  
+// };
+// int extra_delay = 50; //50 microseconds
 
 
 
@@ -45,8 +50,11 @@ Waypoint yellowWaypoints[] = {   // Move forward, then turn left
 // float initialYb = 2.9482; // Initial Y position in meters
 // float initialOrientationb = -90.0; // Initial orientation in degrees
 // Waypoint blueWaypoints[] = {
-//     {1.822, 2.900, -90, true},    // Move forward, then turn left
-//     {1.450, 2.000, -90, true},     // Move to final position
+//     // {1.822, 2.900, -90, true},    // Move forward, then turn left
+//     // {1.450, 2.000, -90, true},     // Move to final position
+//     // {1.450, 1.900, -180.0, true} // Optional waypoint for testing
+//     {1.822, 2.900, -667, true},    // Move forward, then turn left
+//     {1.450, 2.000, -667, true},     // Move to final position
 //     {1.450, 1.900, -180.0, true} // Optional waypoint for testing
 // };
 
@@ -55,11 +63,14 @@ Waypoint yellowWaypoints[] = {   // Move forward, then turn left
 // float initialYy = 0.0518; // Initial Y position in meters
 // float initialOrientationy = 90.0; // Initial orientation in degrees
 // Waypoint yellowWaypoints[] = {
-//     {1.822, 0.100, 90, true},    // Move forward, then turn left
-//     {1.450, 1.000, 90, true},     // Move to final position
+//     // {1.822, 0.100, 90, true},    // Move forward, then turn left
+//     // {1.450, 1.000, 90, true},     // Move to final position
+//     // {1.450, 1.150, 180.0, true} // Optional waypoint for testing
+//     {1.822, 0.100, -667, true},    // Move forward, then turn left
+//     {1.450, 1.000, -667, true},     // Move to final position
 //     {1.450, 1.150, 180.0, true} // Optional waypoint for testing
 // };
-
+// int extra_delay = 6000;
 
 // /////////GROUPIE MIDDLE//////
 // // BLUE
@@ -68,8 +79,11 @@ Waypoint yellowWaypoints[] = {   // Move forward, then turn left
 // float initialYb = 2.9482; // Initial Y position in meters
 // float initialOrientationb = -90.0; // Initial orientation in degrees
 // Waypoint blueWaypoints[] = {
-//     {1.712, 2.750, -90, true},    // Move forward, then turn left
-//     {1.450, 2.000, -90, true},     // Move to final position
+//     // {1.712, 2.750, -90, true},    // Move forward, then turn left
+//     // {1.450, 2.000, -90, true},     // Move to final position
+//     // {1.450, 1.500, -180.0, true} // Optional waypoint for testing
+//     {1.712, 2.750, -667, true},    // Move forward, then turn left
+//     {1.450, 2.000, -667, true},     // Move to final position
 //     {1.450, 1.500, -180.0, true} // Optional waypoint for testing
 // };
 
@@ -78,32 +92,40 @@ Waypoint yellowWaypoints[] = {   // Move forward, then turn left
 // float initialYy = 0.0518; // Initial Y position in meters
 // float initialOrientationy = 90.0; // Initial orientation in degrees
 // Waypoint yellowWaypoints[] = {
-//     {1.712, 0.250, 90, true},    // Move forward, then turn left
-//     {1.450, 1.000, 90, true},     // Move to final position
+//     // {1.712, 0.250, 90, true},    // Move forward, then turn left
+//     // {1.450, 1.000, 90, true},     // Move to final position
+//     // {1.450, 1.500, 180.0, true} // Optional waypoint for testing
+//     {1.712, 0.250, -667, true},    // Move forward, then turn left
+//     {1.450, 1.000, -667, true},     // Move to final position
 //     {1.450, 1.500, 180.0, true} // Optional waypoint for testing
 // };
+// int extra_delay = 3000;
 
-// /////////GROUPIE FURTHEST//////
-// // BLUE
-// // define initial position and orientation
-// float initialXb= 1.602;
-// float initialYb = 2.9482; // Initial Y position in meters
-// float initialOrientationb = -90.0; // Initial orientation in degrees
-// Waypoint blueWaypoints[] = {
-//     {1.602, 2.750, -90, true},    // Move forward, then turn left
-//     {1.450, 2.000, -90, true},     // Move to final position
-//     {1.450, 1.150, -180.0, true} // Optional waypoint for testing
-// };
+/////////GROUPIE FURTHEST//////
+// BLUE
+// define initial position and orientation
+float initialXb= 1.602;
+float initialYb = 2.9482; // Initial Y position in meters
+float initialOrientationb = -90.0; // Initial orientation in degrees
+Waypoint blueWaypoints[] = {
+    // {1.602, 2.750, -90, true},    // Move forward, then turn left
+    // {1.450, 2.000, -90, true},     // Move to final position
+    // {1.450, 1.150, -180.0, true} // Optional waypoint for testing
+    {1.602, 2.750, -667, true},    // Move forward, then turn left
+    {1.450, 2.000, -667, true},     // Move to final position
+    {1.450, 1.150, -180.0, true} // Optional waypoint for testing
+};
 
-// //YELLOW
-// float initialXy= 1.602;
-// float initialYy = 0.0518; // Initial Y position in meters
-// float initialOrientationy = 90.0; // Initial orientation in degrees
-// Waypoint yellowWaypoints[] = {
-//     {1.602, 0.250, 90, true},    // Move forward, then turn left
-//     {1.450, 1.000, 90, true},     // Move to final position
-//     {1.450, 1.900, 180.0, true} // Optional waypoint for testing
-// };
+//YELLOW
+float initialXy= 1.602;
+float initialYy = 0.0518; // Initial Y position in meters
+float initialOrientationy = 90.0; // Initial orientation in degrees
+Waypoint yellowWaypoints[] = {
+    {1.602, 0.250, -667, true},    // Move forward, then turn left
+    {1.450, 1.000, -667, true},     // Move to final position
+    {1.450, 1.900, 180.0, true} // Optional waypoint for testing
+};
+int extra_delay = 50; //50 microseconds
 
 
 
@@ -231,8 +253,10 @@ void navigationTask(void *parameter) {
 
     waitUswitchRelease();
     Serial.println("Micro-switch released, delay start.");
-    delay(1000);
+    delay(85000); //real delay
+    //delay(2000); // for testing
     Serial.println("end of delay 85 seconds");
+    delay(extra_delay);
     
     
     // Choose path based on selected side

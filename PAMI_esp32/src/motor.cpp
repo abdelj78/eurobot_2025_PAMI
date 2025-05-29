@@ -757,16 +757,22 @@ void moveStraight3(float distance, int maxSpeed) {
     
     while (true) {
         // Check for obstacles
-        distanceCheck2();
-        // if (obstacle) {
+        // distanceCheck2();
+        // // if (obstacle) {
+        // //     stopMotors();
+        // //     Serial.println("Obstacle detected! Stopping.");
+        // //     //break;// unteresting for path replanning but not for now
+        // // }
+        //     while (obstacle == true) {//later can include the distanceCheck in the while loop and the function should return true or false it's better
         //     stopMotors();
-        //     Serial.println("Obstacle detected! Stopping.");
-        //     //break;// unteresting for path replanning but not for now
-        // }
-            while (obstacle == true) {//later can include the distanceCheck in the while loop and the function should return true or false it's better
+        //     distanceCheck2();
+        //   }
+
+        obstacleDetect(); // Check for obstacles using the ultrasound sensor
+        while(obstacle == true) { // If an obstacle is detected, stop and check again
             stopMotors();
-            distanceCheck2();
-          }
+            obstacleClear(); // Re-check for obstacle if cleared so basically verify longer
+        }
         
         // Get current position in ticks
         int currentPosition = (abs(encoderLPosition) + abs(encoderRPosition)) / 2;
