@@ -1,2 +1,2 @@
 # coupe_de_france_robotique
- robotic french cup code 
+Repo for the small robots at the eurobot 2025
