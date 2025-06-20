@@ -81,8 +81,10 @@ void obstacleDetect (){
     distance = (duration*.0343)/2;
     // Serial.print("Distance: ");
     // Serial.println(distance);
-    //delay(100);
-    if (distance < 10 && distance > 0) { // Check if the distance is less than 10 cm and greater than 0 cm
+    //delay(100); 
+
+    //was 10 at homologation 11 after speed increase and 5 for star only
+    if (distance < 11 && distance > 0) { // Check if the distance is less than 10 cm and greater than 0 cm
       //here we add it larger than 0 to avoid false positives when the sensor is not detecting anything
       //occurs when obstacle is very far away or not plugged in
       obstacle = true;

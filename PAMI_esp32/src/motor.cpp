@@ -636,6 +636,14 @@ void turnByAngle3(float angle, int maxSpeed) {
     unsigned long lastDebugTime = millis();
     
     while (true) {
+
+        // Check for match end - add this at the top of the loop
+        if (matchEnded) {
+            Serial.println("Match ended during moveStraight3!");
+            stopMotors();
+            return;  // Exit the function immediately
+        }
+
         // Get current heading
         if (xSemaphoreTake(positionMutex, portMAX_DELAY) == pdTRUE) {
             currentYawLocal = currentYaw;
@@ -671,21 +679,21 @@ void turnByAngle3(float angle, int maxSpeed) {
             analogWrite(pwmB, adjustedSpeed);
         }
         
-        // Debug output every 100ms
-        if (millis() - lastDebugTime > 100) {
-            Serial.print("Current: ");
-            Serial.print(currentYawLocal);
-            Serial.print(" Target: ");
-            Serial.print(targetAngle);
-            Serial.print(" Error: ");
-            Serial.print(yawError);
-            Serial.print(" Speed: ");
-            Serial.println(adjustedSpeed);
-            lastDebugTime = millis();
-        }
+        // // Debug output every 100ms
+        // if (millis() - lastDebugTime > 100) {
+        //     Serial.print("Current: ");
+        //     Serial.print(currentYawLocal);
+        //     Serial.print(" Target: ");
+        //     Serial.print(targetAngle);
+        //     Serial.print(" Error: ");
+        //     Serial.print(yawError);
+        //     Serial.print(" Speed: ");
+        //     Serial.println(adjustedSpeed);
+        //     lastDebugTime = millis();
+        // }
         
         // Stop when close enough to target
-        if (abs(yawError) < 0.5 ) {
+        if (abs(yawError) < 0.25 ) {//was 0.5 in most of competition
             stopMotors();
             Serial.println("Target angle reached!");
             break;
@@ -742,14 +750,14 @@ void moveStraight3(float distance, int maxSpeed) {
     int cruiseDist = ticksToTravel - accelDist - decelDist;
     
     // Debug information
-    Serial.print("Movement profile: ");
-    Serial.print(accelDist);
-    Serial.print(" ticks accel, ");
-    Serial.print(cruiseDist);
-    Serial.print(" ticks cruise, ");
-    Serial.print(decelDist);
-    Serial.print(" ticks decel, max speed ");
-    Serial.println(maxSpeed);
+    // Serial.print("Movement profile: ");
+    // Serial.print(accelDist);
+    // Serial.print(" ticks accel, ");
+    // Serial.print(cruiseDist);
+    // Serial.print(" ticks cruise, ");
+    // Serial.print(decelDist);
+    // Serial.print(" ticks decel, max speed ");
+    // Serial.println(maxSpeed);
     
     // Timing variables
     unsigned long startTime = millis();
@@ -768,10 +776,23 @@ void moveStraight3(float distance, int maxSpeed) {
         //     distanceCheck2();
         //   }
 
+        // Check for match end - add this at the top of the loop
+        if (matchEnded) {
+            Serial.println("Match ended during moveStraight3!");
+            stopMotors();
+            return;  // Exit the function immediately
+        }
+
         obstacleDetect(); // Check for obstacles using the ultrasound sensor
         while(obstacle == true) { // If an obstacle is detected, stop and check again
             stopMotors();
             obstacleClear(); // Re-check for obstacle if cleared so basically verify longer
+                // Check for match end - add this at the top of the loop
+            if (matchEnded) {
+              Serial.println("Match ended during moveStraight3!");
+              stopMotors();
+              return;  // Exit the function immediately
+            }
         }
         
         // Get current position in ticks
@@ -831,23 +852,23 @@ void moveStraight3(float distance, int maxSpeed) {
 
         
         // Debug output every 200ms
-        unsigned long currentTime = millis();
-        if (currentTime - lastDebugTime > 200) {
-            Serial.print("Position: ");
-            Serial.print(currentPosition);
-            Serial.print("/");
-            Serial.print(ticksToTravel);
-            Serial.print(", Speed: ");
-            Serial.print(baseSpeed);
-            Serial.print(", Yaw error: ");
-            Serial.print(yawError);
-            Serial.print(", L/R: ");
-            Serial.print(leftSpeed);
-            Serial.print("/");
-            Serial.println(rightSpeed);
+        // unsigned long currentTime = millis();
+        // if (currentTime - lastDebugTime > 200) {
+        //     Serial.print("Position: ");
+        //     Serial.print(currentPosition);
+        //     Serial.print("/");
+        //     Serial.print(ticksToTravel);
+        //     Serial.print(", Speed: ");
+        //     Serial.print(baseSpeed);
+        //     Serial.print(", Yaw error: ");
+        //     Serial.print(yawError);
+        //     Serial.print(", L/R: ");
+        //     Serial.print(leftSpeed);
+        //     Serial.print("/");
+        //     Serial.println(rightSpeed);
             
-            lastDebugTime = currentTime;
-        }
+        //     lastDebugTime = currentTime;
+        // }
         
         // Small delay for system stability
         delay(5);
@@ -862,6 +883,72 @@ void moveStraight3(float distance, int maxSpeed) {
     Serial.print("m, Actual: ");
     Serial.print(actualDistance);
     Serial.println("m");
+}
+
+void moveBackwardTime(int duration, int baseSpeed) {
+  int minSpeed = 60; // Minimum speed to overcome static friction
+  int maxSpeed = 255; // Maximum speed for the motors
+
+
+    resetStraightPID();  // Reset the straight-line PID controller
+    
+    // Get initial heading to maintain
+    float currentYawLocal = 0;
+    if (xSemaphoreTake(positionMutex, portMAX_DELAY) == pdTRUE) {
+        currentYawLocal = currentYaw;
+        xSemaphoreGive(positionMutex);
+    }
+    float targetHeading = currentYawLocal; // Set target heading to maintain
+    
+    
+    // Timing variables
+    unsigned long startTime = millis();
+    unsigned long lastDebugTime = startTime;
+    
+    while (startTime + duration > millis()) {
+        
+        // Get current heading
+        if (xSemaphoreTake(positionMutex, portMAX_DELAY) == pdTRUE) {
+            currentYawLocal = currentYaw;
+            xSemaphoreGive(positionMutex);
+        }
+        
+        // Calculate heading error and correction
+        float yawError = normalizeAngle(targetHeading - currentYawLocal);
+        float correction = PIDControlStraight(yawError);  // Use straight-specific PID
+        
+        
+        // Apply heading correction to motor speeds
+        int leftSpeed = baseSpeed - correction;
+        int rightSpeed = baseSpeed + correction;
+
+        // Apply speed to motors with correction
+        int finalSpeedLeft = constrain(leftSpeed, minSpeed, maxSpeed);
+        int finalSpeedRight = constrain(rightSpeed, minSpeed, maxSpeed);
+        Serial.print("left speed: ");
+        Serial.print(finalSpeedLeft);
+        Serial.print(" right speed: ");
+        Serial.println(finalSpeedRight);
+        
+        // Set Motor A 
+        digitalWrite(in1A, LOW);
+        digitalWrite(in2A, HIGH);
+        analogWrite(pwmA, finalSpeedLeft);
+        
+        // Set Motor B
+        digitalWrite(in1B, HIGH);
+        digitalWrite(in2B, LOW);
+        analogWrite(pwmB, finalSpeedRight);
+        
+        // Small delay for system stability
+        delay(5);
+    }
+    stopMotors();
+    
+    Serial.print("Move completed. Requested backward for : ");
+    Serial.print(duration / 1000.0, 2);
+    Serial.print(" seconds.");
+
 }
 
 

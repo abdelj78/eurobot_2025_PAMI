@@ -5,6 +5,8 @@
 extern volatile long encoderLPosition;
 extern volatile long encoderRPosition;
 
+extern volatile bool matchEnded;
+
 // Function declarations
 void motorSetup();
 void motorLoop();
@@ -27,5 +29,6 @@ float PIDControlStraight(float error);
 void resetStraightPID();
 void resetTurnPID();
 
+void moveBackwardTime(int duration, int baseSpeed) ;
 
 #endif // MPU_DRIVER_INT_H

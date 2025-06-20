@@ -206,7 +206,7 @@ void navigateToWaypoint(Waypoint waypoint) {
     Serial.println(turnAngle);
     
     // Execute the turn
-    turnByAngle3(turnAngle, 80);
+    turnByAngle3(turnAngle, 40);
         // After turning, get the current heading - this is what we'll use for position update
     float movementHeading;
     if (xSemaphoreTake(positionMutex, portMAX_DELAY) == pdTRUE) {
@@ -224,7 +224,8 @@ void navigateToWaypoint(Waypoint waypoint) {
     // Then move to the waypoint
     Serial.print("Moving distance: ");
     Serial.println(distToWaypoint);
-    moveStraight3(distToWaypoint, 180); // pre-homologation was 255 but seem to much as stop too close to objects and misses some obstacles
+    //JUST FOR SUPERSTAR KEEP THIS SPEED LOW
+    moveStraight3(distToWaypoint, 255); // pre-homologation was 255 but seem to much as stop too close to objects and misses some obstacles
       // Calculate distance traveled
     float distanceTraveled = (encoderLPosition + encoderRPosition) / (2.0 * 6777.0);
         // Update position using the heading we were moving in and distance traveled

@@ -6,6 +6,28 @@
 #include "general_pins.h"
 #include "navigation.h"
 
+/////TIMER NEW CODE///
+#include "esp32-hal-timer.h"
+
+// Global variables for match timing
+hw_timer_t *matchTimer = NULL;
+volatile bool matchEnded = false;
+
+// Timer ISR
+void IRAM_ATTR onMatchEnd() {
+    matchEnded = true;
+}
+
+void startMatchTimer(int durationMs) {
+    matchTimer = timerBegin(0, 80, true);
+    timerAttachInterrupt(matchTimer, &onMatchEnd, true);
+    timerAlarmWrite(matchTimer, durationMs * 1000, false);  // in microseconds
+    timerAlarmEnable(matchTimer);
+    Serial.print("Match timer started for ");
+    Serial.print(durationMs/1000.0);
+    Serial.println(" seconds");
+}
+/////////////
 
 //int ROBOT_NB = 1; // 1= Super
 
@@ -26,7 +48,8 @@
 //     // {1.932, 1.800, -90, true},    // Move forward, then turn left
 //     // {1.619025, 1.800, -180.0, true},     // Move to final position
 //     {1.932, 1.800, -667, true},    // Move forward, then turn left
-//     {1.619025, 1.800, -667, true},     // Move to final position
+//     //{1.619025, 1.800, -667, true},     // Move to final position // part used for most of comp
+//     {1.620025, 1.800, -667, true}     // Move to final position
 // };
 // //YELLOW
 // // define initial position and orientation
@@ -37,7 +60,8 @@
 //     // {1.932, 1.200, 90, true}, 
 //     // {1.619025 , 1.200, 180, true }    // Move to final position
 //     {1.932, 1.200, -667, true}, 
-//     {1.619025 , 1.200, -667, true }  
+//     //{1.619025 , 1.200, -667, true }   //part used for most the comp
+//     {1.620025 , 1.200, -667, true }
 // };
 // int extra_delay = 50; //50 microseconds
 
@@ -101,31 +125,31 @@
 // };
 // int extra_delay = 3000;
 
-/////////GROUPIE FURTHEST//////
-// BLUE
-// define initial position and orientation
-float initialXb= 1.602;
-float initialYb = 2.9482; // Initial Y position in meters
-float initialOrientationb = -90.0; // Initial orientation in degrees
-Waypoint blueWaypoints[] = {
-    // {1.602, 2.750, -90, true},    // Move forward, then turn left
-    // {1.450, 2.000, -90, true},     // Move to final position
-    // {1.450, 1.150, -180.0, true} // Optional waypoint for testing
-    {1.602, 2.750, -667, true},    // Move forward, then turn left
-    {1.450, 2.000, -667, true},     // Move to final position
-    {1.450, 1.150, -180.0, true} // Optional waypoint for testing
-};
+// /////////GROUPIE FURTHEST//////
+// // BLUE
+// // define initial position and orientation
+// float initialXb= 1.602;
+// float initialYb = 2.9482; // Initial Y position in meters
+// float initialOrientationb = -90.0; // Initial orientation in degrees
+// Waypoint blueWaypoints[] = {
+//     // {1.602, 2.750, -90, true},    // Move forward, then turn left
+//     // {1.450, 2.000, -90, true},     // Move to final position
+//     // {1.450, 1.150, -180.0, true} // Optional waypoint for testing
+//     {1.602, 2.750, -667, true},    // Move forward, then turn left
+//     {1.450, 2.000, -667, true},     // Move to final position
+//     {1.450, 1.150, -180.0, true} // Optional waypoint for testing
+// };
 
-//YELLOW
-float initialXy= 1.602;
-float initialYy = 0.0518; // Initial Y position in meters
-float initialOrientationy = 90.0; // Initial orientation in degrees
-Waypoint yellowWaypoints[] = {
-    {1.602, 0.250, -667, true},    // Move forward, then turn left
-    {1.450, 1.000, -667, true},     // Move to final position
-    {1.450, 1.900, 180.0, true} // Optional waypoint for testing
-};
-int extra_delay = 50; //50 microseconds
+// //YELLOW
+// float initialXy= 1.602;
+// float initialYy = 0.0518; // Initial Y position in meters
+// float initialOrientationy = 90.0; // Initial orientation in degrees
+// Waypoint yellowWaypoints[] = {
+//     {1.602, 0.250, -667, true},    // Move forward, then turn left
+//     {1.450, 1.000, -667, true},     // Move to final position
+//     {1.450, 1.900, 180.0, true} // Optional waypoint for testing
+// };
+// int extra_delay = 50; //50 microseconds
 
 
 
@@ -249,33 +273,107 @@ void navigationTask(void *parameter) {
 //   }
 
     generalPinsSetup();
-    // Initialize navigation
 
     waitUswitchRelease();
     Serial.println("Micro-switch released, delay start.");
-    delay(85000); //real delay
-    //delay(2000); // for testing
-    Serial.println("end of delay 85 seconds");
-    delay(extra_delay);
-    
-    
-    // Choose path based on selected side
-    if (blue_flag) {
-        Serial.println("Following blue path");
-        //testPositionTracking();
-        //initial position superstar
-        //initial position groupie close
-        //initial position groupie middle
-        //initial position groupie furthest
-        initNavigation(initialXb, initialYb, initialOrientationb);
-        followPath(blueWaypoints, sizeof(blueWaypoints)/sizeof(Waypoint));
-    } else {
-        Serial.println("Following red path");
-        initNavigation(initialXy, initialYy, initialOrientationy);
-        followPath(yellowWaypoints, sizeof(yellowWaypoints)/sizeof(Waypoint));
-    }
-        servoLoop(); // Control the servo
+    //delay(85000); // 85 second delay
+    delay(2000);
+    Serial.println("End of delay 85 seconds");
+    // Start 15-second match timer
+    matchEnded = false;  // Reset flag
+    startMatchTimer(15000);
+    //delay(extra_delay);
+    delay(50); // just for superstar otherwise use line over
 
+    // // Choose path based on selected side
+    // if (blue_flag) {
+    //     Serial.println("Following blue path");
+    //     initNavigation(initialXb, initialYb, initialOrientationb);
+        
+    //     // Follow path until timer expires
+    //     for (int i = 0; i < sizeof(blueWaypoints)/sizeof(Waypoint); i++) {
+    //         if (matchEnded) {
+    //             Serial.println("Match ended between waypoints!");
+    //             break;
+    //         }
+    //         navigateToWaypoint(blueWaypoints[i]);
+    //     }
+    // } else {
+    //     // Similar logic for yellow path...
+    //     Serial.println("Following yellow path");
+    //     initNavigation(initialXy, initialYy, initialOrientationy);
+    //     // Follow path until timer expires
+    //     for (int i = 0; i < sizeof(yellowWaypoints)/sizeof(Waypoint); i++) {
+    //         if (matchEnded) {
+    //             Serial.println("Match ended between waypoints!");
+    //             break;
+    //         }
+    //         navigateToWaypoint(yellowWaypoints[i]);
+    //     }
+    // }
+
+    // CODE FOR SUPERSTAR ONLY FOR IDF
+    if (blue_flag) { // if blue selected
+    // latest pami version size
+        moveStraight3(1.1482, 120);
+        turnByAngle3(-90.0, 100);
+        moveBackwardTime(1500, 120); // Move backward for 0.15 seconds
+        moveStraight3(0.38,120);
+    } else {
+        moveStraight3(1.1482, 120);
+        turnByAngle3(90.0, 100);
+        moveBackwardTime(1500, 120); // Move backward for 0.15 seconds
+        moveStraight3(0.38,120); 
+    }
+
+
+
+
+    // Always run servo at end, regardless of whether path was completed
+    if (matchEnded) {
+        Serial.println("Match time complete - running servo sequence");
+    } else {
+        Serial.println("Path complete - waiting for match end");
+        while (!matchEnded) {
+            delay(10);  // Short delay to save power
+        }
+        Serial.println("Match ended after waiting");
+    }
+
+    // Run servo sequence
+    servoLoop();
+
+
+
+    // ////////POST TIMER FUNCTION CODE , CODE OF HOMOLOGATION/////
+    // generalPinsSetup();
+    // // Initialize navigation
+
+    // waitUswitchRelease();
+    // Serial.println("Micro-switch released, delay start.");
+    // delay(85000); //real delay
+    // //delay(2000); // for testing
+    // Serial.println("end of delay 85 seconds");
+    // delay(extra_delay);
+    
+    
+    // // Choose path based on selected side
+    // if (blue_flag) {
+    //     Serial.println("Following blue path");
+    //     //testPositionTracking();
+    //     //initial position superstar
+    //     //initial position groupie close
+    //     //initial position groupie middle
+    //     //initial position groupie furthest
+    //     initNavigation(initialXb, initialYb, initialOrientationb);
+    //     followPath(blueWaypoints, sizeof(blueWaypoints)/sizeof(Waypoint));
+    // } else {
+    //     Serial.println("Following red path");
+    //     initNavigation(initialXy, initialYy, initialOrientationy);
+    //     followPath(yellowWaypoints, sizeof(yellowWaypoints)/sizeof(Waypoint));
+    // }
+    //     servoLoop(); // Control the servo
+    ////////////////////////////////////
 }
 
 
